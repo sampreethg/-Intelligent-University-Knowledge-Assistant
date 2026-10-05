@@ -159,31 +159,63 @@ st.markdown("""
     }
 
     /* Floating Glowing Action Button */
-    .floating-action-btn {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
-        color: white !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        cursor: pointer;
-        box-shadow: 0 0 16px rgba(99, 102, 241, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
-        z-index: 999999;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        text-decoration: none !important;
+    div.st-key-floating_guide_btn {
+        position: fixed !important;
+        bottom: 24px !important;
+        right: 24px !important;
+        width: 48px !important;
+        height: 48px !important;
+        z-index: 999999 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .floating-action-btn:hover {
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 0 25px rgba(168, 85, 247, 0.8), 0 6px 16px rgba(0, 0, 0, 0.5);
+    div.st-key-floating_guide_btn > div {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    div.st-key-floating_guide_btn button {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        max-width: 48px !important;
+        max-height: 48px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #6366F1 0%, #A855F7 100%) !important;
+        color: white !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.25rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 0 16px rgba(99, 102, 241, 0.65), 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    div.st-key-floating_guide_btn button:hover {
+        transform: scale(1.1) translateY(-2px) !important;
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.85), 0 6px 16px rgba(0, 0, 0, 0.5) !important;
         color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    div.st-key-floating_guide_btn button:focus,
+    div.st-key-floating_guide_btn button:active {
+        color: #ffffff !important;
+        border-color: #818CF8 !important;
+        outline: none !important;
+    }
+
+    div.st-key-floating_guide_btn button p {
+        font-size: 1.25rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -265,10 +297,6 @@ if not st.session_state.has_seen_guide:
 
 # 5. Sidebar: Repositories, Telemetry & File Management
 with st.sidebar:
-    if st.button("ℹ️ How to Use UniMind", use_container_width=True):
-        show_welcome_guide()
-
-    st.markdown("---")
     st.markdown("### 🏛️ Knowledge Hub")
     st.caption("Institutional document database & status.")
 
@@ -518,15 +546,6 @@ if user_input:
                     "sources": []
                 })
 
-# 10. Floating Action Button (DOM Injection)
-st.markdown("""
-<a href="javascript:void(0)" class="floating-action-btn" title="How to Use UniMind" onclick="
-    const btns = window.parent.document.querySelectorAll('button');
-    for (const b of btns) {
-        if (b.innerText.includes('How to Use UniMind')) {
-            b.click();
-            break;
-        }
-    }
-">❓</a>
-""", unsafe_allow_html=True)
+# 10. Floating Action Button (Quick Guide)
+if st.button("❓", key="floating_guide_btn", help="How to Use UniMind Guide"):
+    show_welcome_guide()

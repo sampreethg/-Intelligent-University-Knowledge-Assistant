@@ -38,31 +38,37 @@ class VectorStore:
         if not chunks:
             return
 
-        doc_id = database.record_document(filename)
-        texts = [c["text"] for c in chunks if c.get("text", "").strip()]
-        
-        if not texts:
+        valid_chunks = [c for c in chunks if c.get("text", "").strip()]
+        if not valid_chunks:
             return
+
+        # If document already exists, remove previous version first to avoid stale/duplicate chunks
+        if database.document_exists(filename):
+            self.delete_document(filename)
+
+        doc_id = database.record_document(filename)
+        texts = [c["text"].strip() for c in valid_chunks]
 
         try:
             embeddings = self.embedder.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
             embeddings = np.ascontiguousarray(embeddings, dtype=np.float32)
 
-            current_total = self.index.ntotal
-            assigned_ids = np.arange(current_total, current_total + len(texts), dtype=np.int64)
+            # Generate collision-free IDs by querying max ID from the database
+            start_id = database.get_next_chunk_id()
+            assigned_ids = np.arange(start_id, start_id + len(valid_chunks), dtype=np.int64)
 
             self.index.add_with_ids(embeddings, assigned_ids)
             self.save()
 
             sqlite_payload = []
-            for i, chunk in enumerate(chunks):
+            for i, chunk in enumerate(valid_chunks):
                 sqlite_payload.append({
                     "id": int(assigned_ids[i]),
                     "doc_id": doc_id,
                     "filename": chunk.get("filename", filename),
                     "page_number": chunk.get("page_number", chunk.get("page", 1)),
                     "chunk_index": chunk.get("chunk_index", i),
-                    "text_content": chunk.get("text", "")
+                    "text_content": chunk.get("text", "").strip()
                 })
             database.insert_chunks(sqlite_payload)
         except Exception as e:

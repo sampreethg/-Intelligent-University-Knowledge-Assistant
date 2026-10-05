@@ -335,20 +335,26 @@ with st.sidebar:
             for idx, file in enumerate(uploaded_files):
                 filename = file.name
                 try:
+                    if hasattr(file, "seek"):
+                        file.seek(0)
                     file_bytes = file.read()
                     if not file_bytes:
+                        st.warning(f"File '{filename}' is empty.")
                         continue
                     pages = parse_document(file_bytes, filename)
                     chunks = process_extracted_pages(pages, chunk_size=1500, overlap=200)
                     if chunks:
                         store.add_documents(chunks, filename)
                         success_count += 1
+                    else:
+                        st.warning(f"No extractable text found in '{filename}'.")
                 except Exception as err:
                     st.error(f"Error indexing {filename}: {err}")
                 finally:
                     progress_bar.progress((idx + 1) / len(uploaded_files))
             if success_count > 0:
                 st.toast(f"Indexed {success_count} file(s)!", icon="✅")
+                time.sleep(0.6)
                 st.rerun()
         else:
             st.warning("Select files to upload.")

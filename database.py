@@ -47,6 +47,20 @@ def insert_chunks(chunks_data: List[Dict[str, Any]]):
         """, chunks_data)
         conn.commit()
 
+def get_next_chunk_id() -> int:
+    """Return the next available integer ID for chunk insertion to prevent collision."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COALESCE(MAX(id), -1) + 1 AS next_id FROM chunks")
+        return cursor.fetchone()["next_id"]
+
+def document_exists(filename: str) -> bool:
+    """Check if a document with this filename is already registered."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM documents WHERE filename = ?", (filename,))
+        return cursor.fetchone() is not None
+
 def get_chunks_by_ids(ids: List[int]) -> List[Dict[str, Any]]:
     if not ids:
         return []
@@ -54,7 +68,7 @@ def get_chunks_by_ids(ids: List[int]) -> List[Dict[str, Any]]:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(f"""
-            SELECT id, filename, page_number, text_content 
+            SELECT id, filename, page_number, chunk_index, text_content 
             FROM chunks 
             WHERE id IN ({placeholders})
         """, ids)

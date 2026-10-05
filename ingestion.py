@@ -27,6 +27,8 @@ def parse_document(file_bytes: bytes, filename: str) -> List[Dict[str, Any]]:
                             "text": text,
                             "filename": filename
                         })
+        except (PermissionError, ValueError):
+            raise
         except Exception as e:
             raise RuntimeError(f"Failed to read PDF '{filename}': {str(e)}")
 
@@ -38,6 +40,19 @@ def parse_document(file_bytes: bytes, filename: str) -> List[Dict[str, Any]]:
                 cleaned = para.text.strip()
                 if cleaned:
                     full_text.append(cleaned)
+
+            # Also extract tables commonly found in syllabus and regulations
+            for table in doc.tables:
+                for row in table.rows:
+                    row_cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+                    if row_cells:
+                        # Deduplicate repeated adjacent merged cells
+                        deduped_cells = []
+                        for cell_val in row_cells:
+                            if not deduped_cells or deduped_cells[-1] != cell_val:
+                                deduped_cells.append(cell_val)
+                        if deduped_cells:
+                            full_text.append(" | ".join(deduped_cells))
 
             combined_text = "\n".join(full_text)
             if combined_text:

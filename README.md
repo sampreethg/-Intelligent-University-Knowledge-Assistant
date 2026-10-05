@@ -2,6 +2,8 @@
 
 UniMind is an offline-capable, deterministic, citation-backed Retrieval-Augmented Generation (RAG) system engineered for academic institutions, universities, and compliance-driven organizations. It allows students and faculty to query complex regulations, syllabi, exam ordinances, and policies with zero hallucinations.
 
+
+Live Link : https://github.com/sampreethg/-Intelligent-University-Knowledge-Assistant
 ---
 
 ## 🚀 Key Features
